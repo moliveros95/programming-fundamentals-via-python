@@ -19,18 +19,95 @@ A git-contribution-style **habit tracker grid** shows weekday completion history
 
 ## Curriculum overview
 
-| Week | Topic |
+### Week 1 — Variables, Data Types & I/O
+| Day | Topic |
 |---|---|
-| 1 | Variables, data types, operators, input/output |
-| 2 | Control flow — if/else, loops, break/continue |
-| 3 | Data structures — lists, tuples, dicts, sets |
-| 4 | Functions — args, return values, scope, lambdas |
-| 5 | String manipulation & formatting |
-| 6 | File I/O — text files, CSV, JSON |
-| 7 | Error handling — try/except, custom exceptions |
-| 8 | Modules, packages, virtual environments |
-| 9 | OOP basics — classes, objects, inheritance |
-| 10 | Working with APIs, intro to boto3, final project |
+| 1 | Variables & print/input |
+| 2 | Numbers & arithmetic |
+| 3 | Strings & f-strings |
+| 4 | Booleans & comparisons |
+| 5 | Type conversion — review |
+ 
+### Week 2 — Control Flow
+| Day | Topic |
+|---|---|
+| 1 | if / elif / else |
+| 2 | while loops |
+| 3 | for loops & range() |
+| 4 | break, continue, pass |
+| 5 | Nested loops — review |
+ 
+### Week 3 — Data Structures
+| Day | Topic |
+|---|---|
+| 1 | Lists |
+| 2 | List methods & slicing |
+| 3 | Tuples |
+| 4 | Dictionaries |
+| 5 | Sets — review |
+ 
+### Week 4 — Functions
+| Day | Topic |
+|---|---|
+| 1 | Defining functions |
+| 2 | Default & keyword arguments |
+| 3 | *args and **kwargs |
+| 4 | Scope |
+| 5 | Lambda functions — review |
+ 
+### Week 5 — String Manipulation
+| Day | Topic |
+|---|---|
+| 1 | String methods |
+| 2 | Formatting deep dive |
+| 3 | Intro to regex (re module) |
+| 4 | Practical parsing |
+| 5 | Review project |
+ 
+### Week 6 — File I/O
+| Day | Topic |
+|---|---|
+| 1 | Reading & writing text files |
+| 2 | CSV module |
+| 3 | JSON module |
+| 4 | Context managers (with) |
+| 5 | Review — parse a log file |
+ 
+### Week 7 — Error Handling
+| Day | Topic |
+|---|---|
+| 1 | try / except basics |
+| 2 | else, finally & multiple excepts |
+| 3 | Raising exceptions |
+| 4 | Custom exceptions |
+| 5 | Review — robust script |
+ 
+### Week 8 — Modules & Environments
+| Day | Topic |
+|---|---|
+| 1 | import & the standard library |
+| 2 | Writing your own modules |
+| 3 | pip & third-party packages |
+| 4 | Virtual environments |
+| 5 | Review — organize a project |
+ 
+### Week 9 — Object-Oriented Programming
+| Day | Topic |
+|---|---|
+| 1 | Classes & objects |
+| 2 | __init__ and attributes |
+| 3 | Methods |
+| 4 | Inheritance |
+| 5 | Review — class hierarchy |
+ 
+### Week 10 — APIs, boto3 & Final Project
+| Day | Topic |
+|---|---|
+| 1 | requests & calling a REST API |
+| 2 | Parsing JSON API responses |
+| 3 | Intro to boto3 — S3 |
+| 4 | boto3 — EC2 instances |
+| 5 | Final project |
 
 ## Usage
 
