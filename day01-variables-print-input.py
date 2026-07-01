@@ -1,5 +1,3 @@
-# Day 1 - variables, print, and input
-
 # Lesson
 # Variables are names bound to values — Python figures out the type for you (no need to declare 'int x' like in some languages). 
 # Use print() to display output and input() to read a line of text from the user (always returns a string).
