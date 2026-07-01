@@ -1,0 +1,825 @@
+<style>
+  :root{
+    --bg:#0a0e13;
+    --panel:#11161d;
+    --panel-2:#161c25;
+    --border:#232b36;
+    --text:#d6dee6;
+    --text-dim:#7c8a99;
+    --green:#5fd97a;
+    --green-dim:#2e5c3a;
+    --amber:#e8a33d;
+    --blue:#6ea8fe;
+    --red:#e5675f;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  #pft-root{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    padding:0;
+    min-height:100%;
+    line-height:1.5;
+  }
+  #pft-root .mono{font-family:var(--mono);}
+
+  /* Terminal window chrome */
+  .term-window{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:20px;
+  }
+  .term-bar{
+    background:var(--panel-2);
+    padding:9px 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .term-dot{width:10px;height:10px;border-radius:50%;}
+  .term-title{
+    margin-left:8px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .term-body{padding:18px 20px;}
+
+  .prompt{font-family:var(--mono);color:var(--green);font-size:13px;}
+  .prompt .path{color:var(--blue);}
+  .prompt .cmd{color:var(--text);}
+
+  h1.pft-h1{
+    font-family:var(--mono);
+    font-size:22px;
+    font-weight:600;
+    margin:6px 0 4px 0;
+    color:#fff;
+    letter-spacing:-0.3px;
+  }
+  .subtitle{color:var(--text-dim);font-size:13px;margin-bottom:0;}
+
+  /* Stats row */
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin:18px 0 24px 0;
+  }
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px 16px;
+  }
+  .stat-label{
+    font-family:var(--mono);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .stat-value{
+    font-family:var(--mono);
+    font-size:24px;
+    font-weight:600;
+    color:#fff;
+  }
+  .stat-value.green{color:var(--green);}
+  .stat-value.amber{color:var(--amber);}
+
+  /* Progress bar */
+  .progress-outer{
+    width:100%;
+    height:8px;
+    background:var(--panel-2);
+    border-radius:4px;
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .progress-inner{
+    height:100%;
+    background:linear-gradient(90deg,var(--green-dim),var(--green));
+    transition:width .4s ease;
+  }
+
+  /* Habit tracker grid (git-contribution style) */
+  .habit-section{margin-bottom:26px;}
+  .section-label{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-label::before{content:"#";color:var(--green);}
+
+  .habit-grid{
+    display:flex;
+    gap:4px;
+    overflow-x:auto;
+    padding-bottom:6px;
+  }
+  .habit-week-col{display:flex;flex-direction:column;gap:4px;}
+  .habit-cell{
+    width:13px;height:13px;border-radius:3px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+  }
+  .habit-cell.done{background:var(--green);border-color:var(--green);}
+  .habit-cell.weekend{background:transparent;border:1px dashed #1b2230;}
+  .habit-cell.today{outline:1px solid var(--blue);outline-offset:1px;}
+  .habit-legend{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:11px;color:var(--text-dim);font-family:var(--mono);}
+  .habit-legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle;}
+
+  /* Weeks / days tree */
+  .week-block{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .week-header{
+    padding:12px 16px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    user-select:none;
+  }
+  .week-header:hover{background:var(--panel-2);}
+  .week-header-left{display:flex;align-items:center;gap:10px;}
+  .week-caret{
+    font-family:var(--mono);
+    color:var(--text-dim);
+    transition:transform .2s;
+    font-size:12px;
+    width:12px;
+  }
+  .week-caret.open{transform:rotate(90deg);}
+  .week-name{font-family:var(--mono);font-size:13px;color:#fff;}
+  .week-topic{font-size:12px;color:var(--text-dim);}
+  .week-progress-mini{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+  }
+  .week-days{
+    border-top:1px solid var(--border);
+    display:none;
+  }
+  .week-days.open{display:block;}
+
+  .day-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 16px 10px 34px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .day-row:last-child{border-bottom:none;}
+  .day-row:hover{background:var(--panel-2);}
+  .day-check{
+    width:16px;height:16px;
+    border-radius:3px;
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    font-size:11px;
+    color:var(--green);
+  }
+  .day-check.done{background:var(--green-dim);border-color:var(--green);}
+  .day-filename{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text);
+    flex-shrink:0;
+  }
+  .day-filename.done{color:var(--text-dim);text-decoration:line-through;text-decoration-color:var(--green-dim);}
+  .day-topic{font-size:12.5px;color:var(--text-dim);flex-grow:1;}
+  .day-status{
+    font-family:var(--mono);
+    font-size:10px;
+    padding:2px 8px;
+    border-radius:10px;
+    flex-shrink:0;
+  }
+  .day-status.pending{background:#1b2230;color:var(--text-dim);}
+  .day-status.pass{background:var(--green-dim);color:var(--green);}
+
+  /* Detail panel (inline expand) */
+  .detail-panel{
+    background:#0d1219;
+    border-top:1px solid var(--border);
+    padding:18px 24px 20px 34px;
+  }
+  .detail-block-label{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--blue);
+    margin-bottom:6px;
+    margin-top:14px;
+  }
+  .detail-block-label:first-child{margin-top:0;}
+  .detail-text{font-size:13.5px;color:var(--text);white-space:pre-wrap;}
+  .challenge-box{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--amber);
+    border-radius:4px;
+    padding:12px 14px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text);
+    white-space:pre-wrap;
+  }
+  .notes-area{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:4px;
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:12.5px;
+    padding:10px 12px;
+    min-height:60px;
+    resize:vertical;
+    margin-top:6px;
+  }
+  .notes-area::placeholder{color:#4a5563;}
+  .detail-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+  }
+  .btn{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:8px 14px;
+    border-radius:5px;
+    border:1px solid var(--border);
+    background:var(--panel-2);
+    color:var(--text);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .btn:hover{border-color:var(--text-dim);}
+  .btn.primary{
+    background:var(--green-dim);
+    border-color:var(--green);
+    color:var(--green);
+  }
+  .btn.primary:hover{background:var(--green);color:#0a0e13;}
+  .btn.primary.done-state{
+    background:transparent;
+    border-color:var(--border);
+    color:var(--text-dim);
+  }
+  .save-hint{font-size:11px;color:var(--text-dim);font-family:var(--mono);}
+
+  .footer-note{
+    text-align:center;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:11px;
+    margin-top:24px;
+    padding-bottom:6px;
+  }
+
+  @media (max-width:640px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .day-row{flex-wrap:wrap;}
+    .day-topic{width:100%;order:3;}
+  }
+</style>
+
+<div id="pft-root">
+  <div class="term-window">
+    <div class="term-bar">
+      <span class="term-dot" style="background:#e5675f"></span>
+      <span class="term-dot" style="background:#e8a33d"></span>
+      <span class="term-dot" style="background:#5fd97a"></span>
+      <span class="term-title">mavs@python-fundamentals — 80x24</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt"><span class="path">~</span> <span class="cmd">$ cat curriculum/status</span></div>
+      <h1 class="pft-h1">Python Fundamentals — 10 Week Plan</h1>
+      <p class="subtitle">1 hr/day · Mon–Fri · 50 lessons · scripts, not multiple choice</p>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value green" id="pft-stat-done">0 / 50</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Current streak</div>
+          <div class="stat-value amber" id="pft-stat-streak">0 days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Est. finish</div>
+          <div class="stat-value" id="pft-stat-finish">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This week</div>
+          <div class="stat-value" id="pft-stat-week">0 / 5</div>
+        </div>
+      </div>
+
+      <div class="progress-outer"><div class="progress-inner" id="pft-progress-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="term-window">
+    <div class="term-bar">
+      <span class="term-dot" style="background:#e5675f"></span>
+      <span class="term-dot" style="background:#e8a33d"></span>
+      <span class="term-dot" style="background:#5fd97a"></span>
+      <span class="term-title">habit-tracker.log</span>
+    </div>
+    <div class="term-body">
+      <div class="habit-section">
+        <div class="section-label">weekday completion — last 14 weeks</div>
+        <div class="habit-grid" id="pft-habit-grid"></div>
+        <div class="habit-legend">
+          <span><span class="sw" style="background:var(--panel-2);border:1px solid var(--border)"></span>missed</span>
+          <span><span class="sw" style="background:var(--green)"></span>completed</span>
+          <span><span class="sw" style="background:transparent;border:1px dashed #1b2230"></span>weekend (n/a)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-window">
+    <div class="term-bar">
+      <span class="term-dot" style="background:#e5675f"></span>
+      <span class="term-dot" style="background:#e8a33d"></span>
+      <span class="term-dot" style="background:#5fd97a"></span>
+      <span class="term-title">curriculum/</span>
+    </div>
+    <div class="term-body" style="padding:14px 16px;">
+      <div id="pft-weeks"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">progress saved automatically — reopen this artifact anytime to pick up where you left off</div>
+</div>
+
+<script>
+(function(){
+
+const CURRICULUM = [
+  // WEEK 1 — Variables, data types, operators, I/O
+  {id:"w1d1", week:1, weekTopic:"Variables, Data Types & I/O", title:"Variables & print/input",
+   lesson:"Variables are names bound to values — Python figures out the type for you (no need to declare 'int x' like in some languages). Use print() to display output and input() to read a line of text from the user (always returns a string).",
+   challenge:"Write a script that asks the user for an AWS region code (e.g. ap-southeast-1) and their instance count, then prints a sentence like: 'Provisioning 3 instance(s) in ap-southeast-1.'"},
+  {id:"w1d2", week:1, weekTopic:"Variables, Data Types & I/O", title:"Numbers & arithmetic",
+   lesson:"int for whole numbers, float for decimals. Standard operators: + - * / (always returns float) // (floor division) % (modulo) ** (power).",
+   challenge:"Write a script that takes a monthly AWS bill (float) and calculates: cost per day (assume 30 days), and whether the bill exceeds a $50 budget threshold — print both results."},
+  {id:"w1d3", week:1, weekTopic:"Variables, Data Types & I/O", title:"Strings & f-strings",
+   lesson:"Strings are sequences of characters. f-strings (f\"text {variable}\") let you embed variables directly into text — the standard way to build readable output in modern Python.",
+   challenge:"Write a script with variables for an EC2 instance_id, instance_type, and region. Use an f-string to print a one-line summary, e.g. 'i-0abc123 (t2.micro) is running in ap-southeast-1'."},
+  {id:"w1d4", week:1, weekTopic:"Variables, Data Types & I/O", title:"Booleans & comparisons",
+   lesson:"bool is True or False. Comparison operators (== != > < >= <=) produce booleans. These are the building blocks for every decision your scripts will make.",
+   challenge:"Write a script that stores a server's CPU usage percentage in a variable, then prints True/False for: is_healthy (below 80%), needs_scaling (above 90%)."},
+  {id:"w1d5", week:1, weekTopic:"Variables, Data Types & I/O", title:"Type conversion — review",
+   lesson:"int(), float(), str(), bool() convert between types. input() always gives you a string, so numeric input needs explicit conversion before doing math on it.",
+   challenge:"Write a script that reads a disk usage value as text input (e.g. '73.5'), converts it to a float, and prints a warning message only if usage is over 70%. This ties together input, conversion, and conditionals from this week."},
+
+  // WEEK 2 — Control flow
+  {id:"w2d1", week:2, weekTopic:"Control Flow", title:"if / elif / else",
+   lesson:"if/elif/else lets a script branch based on conditions. Python uses indentation (not braces) to define blocks — this is not optional, it's the syntax.",
+   challenge:"Write a script that takes an HTTP status code (int) and prints 'Success', 'Redirect', 'Client Error', or 'Server Error' depending on the range it falls in (2xx/3xx/4xx/5xx)."},
+  {id:"w2d2", week:2, weekTopic:"Control Flow", title:"while loops",
+   lesson:"while repeats a block as long as a condition is True. Always make sure something inside the loop can eventually make the condition False, or you'll get an infinite loop.",
+   challenge:"Write a script that simulates retrying a failed API call: start with retries=0, and while retries < 5, print 'Retry attempt {n}' and increment retries. After the loop, print 'Max retries reached.'"},
+  {id:"w2d3", week:2, weekTopic:"Control Flow", title:"for loops & range()",
+   lesson:"for loops iterate over a sequence. range(start, stop, step) generates a sequence of numbers without storing them all in memory — very common for counted loops.",
+   challenge:"Write a script that loops through numbers 1 to 10 using range() and prints only the even ones, labeled like 'Server-02 is even-numbered'."},
+  {id:"w2d4", week:2, weekTopic:"Control Flow", title:"break, continue, pass",
+   lesson:"break exits a loop entirely. continue skips to the next iteration. pass does nothing (a placeholder for code you'll write later).",
+   challenge:"Write a script with a list of server names. Loop through them: skip (continue) any named 'maintenance', and stop the loop entirely (break) if you hit 'db-primary'. Print each server you process."},
+  {id:"w2d5", week:2, weekTopic:"Control Flow", title:"Nested loops — review",
+   lesson:"Loops can contain other loops (e.g. looping over regions, and for each region, looping over instance types). Keep nested blocks shallow and readable.",
+   challenge:"Write a script with a list of 2 regions and a list of 3 instance types. Use nested for loops to print every region/instance-type combination, e.g. 'ap-southeast-1 — t2.micro'."},
+
+  // WEEK 3 — Data structures
+  {id:"w3d1", week:3, weekTopic:"Data Structures", title:"Lists",
+   lesson:"A list is an ordered, mutable collection: my_list = [1, 2, 3]. Access items by index (starting at 0), and use append() to add items.",
+   challenge:"Write a script that builds a list of 4 server hostnames, appends one more, then prints the total count and the first and last hostname in the list."},
+  {id:"w3d2", week:3, weekTopic:"Data Structures", title:"List methods & slicing",
+   lesson:"Useful list methods: .append(), .remove(), .sort(), .pop(). Slicing my_list[start:stop] grabs a sub-section without modifying the original list.",
+   challenge:"Write a script with a list of 6 CPU usage readings (floats). Sort them, then print the 3 highest readings using slicing (no manual looping)."},
+  {id:"w3d3", week:3, weekTopic:"Data Structures", title:"Tuples",
+   lesson:"A tuple is like a list but immutable (can't be changed after creation) — good for fixed data like coordinates or a (region, zone) pair.",
+   challenge:"Write a script that stores 3 (region, availability_zone) tuples in a list, then loops through and prints each pair using unpacking, e.g. 'for region, az in zones:'."},
+  {id:"w3d4", week:3, weekTopic:"Data Structures", title:"Dictionaries",
+   lesson:"A dict stores key-value pairs: {'name': 'web-01', 'status': 'running'}. Access values by key, add new keys by assignment, check membership with 'in'.",
+   challenge:"Write a script representing an EC2 instance as a dict with keys id, type, region, and status. Print a formatted summary line, then update status to 'stopped' and print the updated dict."},
+  {id:"w3d5", week:3, weekTopic:"Data Structures", title:"Sets — review",
+   lesson:"A set is an unordered collection of unique values — great for deduplication and comparing groups (union, intersection, difference).",
+   challenge:"Write a script with two lists of tag names used across two S3 buckets. Convert both to sets and print which tags are shared (intersection) and which are unique to each bucket."},
+
+  // WEEK 4 — Functions
+  {id:"w4d1", week:4, weekTopic:"Functions", title:"Defining functions",
+   lesson:"def function_name(params): defines a reusable block of code. return sends a value back to the caller. Functions are how you avoid repeating yourself.",
+   challenge:"Write a function celsius_to_fahrenheit(c) that returns the converted value. Call it with 3 different temperatures and print each result."},
+  {id:"w4d2", week:4, weekTopic:"Functions", title:"Default & keyword arguments",
+   lesson:"Parameters can have default values (def f(x, retries=3)), and you can call functions using keyword arguments to make calls self-documenting.",
+   challenge:"Write a function provision_server(name, instance_type='t2.micro', region='ap-southeast-1') that prints a summary line. Call it three times: once with all defaults, once overriding just the region, once overriding all three."},
+  {id:"w4d3", week:4, weekTopic:"Functions", title:"*args and **kwargs",
+   lesson:"*args collects extra positional arguments into a tuple; **kwargs collects extra keyword arguments into a dict. Useful when a function needs to accept a flexible number of inputs.",
+   challenge:"Write a function total_storage(*sizes_gb) that returns the sum of any number of size arguments. Call it with 2 values, then again with 5 values."},
+  {id:"w4d4", week:4, weekTopic:"Functions", title:"Scope",
+   lesson:"Variables defined inside a function are local — they don't exist outside it. Variables defined outside are global and can be read (but not reassigned) inside a function without the 'global' keyword.",
+   challenge:"Write a script with a global variable request_count = 0 and a function log_request() that prints the count on each call but does NOT modify the global (to see the difference). Then rewrite it using the 'global' keyword so it actually increments."},
+  {id:"w4d5", week:4, weekTopic:"Functions", title:"Lambda functions — review",
+   lesson:"lambda args: expression creates a small anonymous function, often used inline with sort() or filter() rather than defined with 'def'.",
+   challenge:"Write a script with a list of server dicts (each with a 'uptime_hours' key). Use sorted() with a lambda as the key to sort the list by uptime, then print the sorted list."},
+
+  // WEEK 5 — String manipulation
+  {id:"w5d1", week:5, weekTopic:"String Manipulation", title:"String methods",
+   lesson:".split(), .join(), .strip(), .upper(), .lower(), .replace() are the core toolkit for cleaning and transforming text.",
+   challenge:"Write a script that takes the string '  web-01, web-02 ,db-01 ' and produces a clean list of hostnames with no extra whitespace, using strip() and split()."},
+  {id:"w5d2", week:5, weekTopic:"String Manipulation", title:"Formatting deep dive",
+   lesson:"f-strings support format specs like {value:.2f} for 2 decimal places or {value:>10} for right-aligned padding — useful for building readable tabular output.",
+   challenge:"Write a script that prints a small aligned table of 3 servers and their CPU usage (float), with the hostname left-aligned and the percentage right-aligned to 1 decimal place."},
+  {id:"w5d3", week:5, weekTopic:"String Manipulation", title:"Intro to regex (re module)",
+   lesson:"The re module matches patterns in text. re.search() finds a pattern, re.findall() returns all matches — useful for pulling structured data out of logs.",
+   challenge:"Write a script that uses re.findall() to extract all IP addresses (basic pattern like \\d+\\.\\d+\\.\\d+\\.\\d+) from a sample multi-line log string."},
+  {id:"w5d4", week:5, weekTopic:"String Manipulation", title:"Practical parsing",
+   lesson:"Real-world text (logs, CSV lines, config values) usually needs a combination of split(), strip(), and conditionals to turn into usable data.",
+   challenge:"Write a script that parses the line '2026-06-30 14:03:12 ERROR Connection timeout on db-01' into separate variables for date, time, level, and message, then prints them labeled."},
+  {id:"w5d5", week:5, weekTopic:"String Manipulation", title:"Review project",
+   lesson:"Combine this week's tools: splitting, formatting, and basic parsing into one small utility script.",
+   challenge:"Write a script that takes a list of 4 raw log lines (level + message), counts how many are ERROR vs INFO, and prints a formatted summary report."},
+
+  // WEEK 6 — File I/O
+  {id:"w6d1", week:6, weekTopic:"File I/O", title:"Reading & writing text files",
+   lesson:"open(path, mode) opens a file — 'r' to read, 'w' to write (overwrites), 'a' to append. Always close files, or better, use a 'with' block (tomorrow's topic).",
+   challenge:"Write a script that writes 3 lines of sample server names to a file called servers.txt, then reopens it and prints each line back out."},
+  {id:"w6d2", week:6, weekTopic:"File I/O", title:"CSV module",
+   lesson:"The csv module reads/writes comma-separated files as rows of lists (or dicts with DictReader), instead of manually splitting on commas.",
+   challenge:"Write a script that writes a small CSV file with columns hostname,cpu_percent for 3 servers, then reads it back with csv.DictReader and prints any server over 80% CPU."},
+  {id:"w6d3", week:6, weekTopic:"File I/O", title:"JSON module",
+   lesson:"json.dumps() converts a Python dict/list to a JSON string; json.loads() parses JSON text back into Python objects. This is exactly the format most cloud APIs return.",
+   challenge:"Write a script with a Python dict describing an EC2 instance. Convert it to a JSON string with json.dumps(), print it, then parse it back with json.loads() and print one field from the result."},
+  {id:"w6d4", week:6, weekTopic:"File I/O", title:"Context managers (with)",
+   lesson:"with open(path) as f: automatically closes the file when the block ends, even if an error occurs — the standard, safe way to handle files in Python.",
+   challenge:"Rewrite your Day 1 file-writing script to use 'with' blocks for both writing and reading, instead of manually calling .close()."},
+  {id:"w6d5", week:6, weekTopic:"File I/O", title:"Review — parse a log file",
+   lesson:"Combine file reading with the string parsing skills from Week 5 to process a whole file line by line.",
+   challenge:"Write a script that writes a small sample log file (4-5 lines, mixing INFO/WARNING/ERROR), then reads it back and prints only the ERROR and WARNING lines, with a count of each at the end."},
+
+  // WEEK 7 — Error handling
+  {id:"w7d1", week:7, weekTopic:"Error Handling", title:"try / except basics",
+   lesson:"try: wraps code that might fail; except ExceptionType: handles the specific failure instead of crashing the whole script.",
+   challenge:"Write a script that asks the user for a number and divides 100 by it, using try/except to catch a ZeroDivisionError and print a friendly message instead of crashing."},
+  {id:"w7d2", week:7, weekTopic:"Error Handling", title:"else, finally & multiple excepts",
+   lesson:"You can catch different exception types separately, use else: for code that runs only if no exception occurred, and finally: for cleanup that always runs.",
+   challenge:"Write a script that tries to convert user input to an int, catching both ValueError (bad input) and ZeroDivisionError (dividing by it) separately, with a finally block that always prints 'Done attempting operation.'"},
+  {id:"w7d3", week:7, weekTopic:"Error Handling", title:"Raising exceptions",
+   lesson:"raise lets your own code trigger an exception deliberately when something invalid happens — useful for validating inputs early.",
+   challenge:"Write a function set_cpu_threshold(value) that raises a ValueError if value is not between 0 and 100, and prints a confirmation otherwise. Test it with one valid and one invalid call, wrapped in try/except."},
+  {id:"w7d4", week:7, weekTopic:"Error Handling", title:"Custom exceptions",
+   lesson:"You can define your own exception classes by inheriting from Exception — useful for making error handling specific to your application's logic.",
+   challenge:"Write a custom exception class InstanceNotFoundError(Exception). Write a function that raises it if a given instance_id isn't in a predefined list, and catch it with a specific except block."},
+  {id:"w7d5", week:7, weekTopic:"Error Handling", title:"Review — robust script",
+   lesson:"Well-written scripts anticipate what can go wrong (bad input, missing data, unexpected values) rather than assuming the happy path.",
+   challenge:"Write a script that processes a list containing a mix of valid numbers and invalid strings (e.g. [10, 'bad', 25, None]), safely calculating the sum of only the valid numbers using try/except inside the loop."},
+
+  // WEEK 8 — Modules & environments
+  {id:"w8d1", week:8, weekTopic:"Modules & Environments", title:"import & the standard library",
+   lesson:"import module_name gives access to built-in modules like os, sys, datetime, random. from module import name imports a specific piece.",
+   challenge:"Write a script that uses the datetime module to print the current date/time, and the random module to generate a random port number between 3000-9000."},
+  {id:"w8d2", week:8, weekTopic:"Modules & Environments", title:"Writing your own modules",
+   lesson:"Any .py file can be imported as a module in another file. Splitting code into modules keeps larger projects organized (e.g. helpers.py imported by main.py).",
+   challenge:"Describe (in comments, as if writing two files) a helpers.py with a function format_bytes(n), and a main.py that imports and uses it. Write out both file contents in your script/notes."},
+  {id:"w8d3", week:8, weekTopic:"Modules & Environments", title:"pip & third-party packages",
+   lesson:"pip install package_name installs libraries not in the standard library (e.g. boto3, requests). requirements.txt lists a project's dependencies for reproducibility.",
+   challenge:"Write a requirements.txt listing boto3 and requests with pinned versions of your choice, and a one-line comment explaining what each package is for."},
+  {id:"w8d4", week:8, weekTopic:"Modules & Environments", title:"Virtual environments",
+   lesson:"python -m venv env creates an isolated environment so a project's dependencies don't conflict with other projects or the system Python.",
+   challenge:"Write out, as a short script/notes file, the exact terminal commands to create a venv, activate it on Linux, and install from requirements.txt — as if documenting setup steps for a teammate."},
+  {id:"w8d5", week:8, weekTopic:"Modules & Environments", title:"Review — organize a project",
+   lesson:"Put together folder structure, modules, and a requirements.txt into a coherent small-project layout.",
+   challenge:"Sketch (as comments/notes) a folder structure for a small script project that checks EC2 instance status: what files it would have, what each does, and how they import from each other."},
+
+  // WEEK 9 — OOP
+  {id:"w9d1", week:9, weekTopic:"Object-Oriented Programming", title:"Classes & objects",
+   lesson:"A class is a blueprint; an object is an instance of it. class ServerInstance: defines the blueprint, ServerInstance() creates an object from it.",
+   challenge:"Write a class ServerInstance with no methods yet, create two instances, and manually set a .name attribute on each, then print both names."},
+  {id:"w9d2", week:9, weekTopic:"Object-Oriented Programming", title:"__init__ and attributes",
+   lesson:"__init__(self, ...) runs automatically when an object is created, letting you set up initial attributes cleanly instead of assigning them one by one after creation.",
+   challenge:"Rewrite Day 1's ServerInstance class with an __init__ that takes name, instance_type, and region, and creates 2 instances by passing values directly into the constructor."},
+  {id:"w9d3", week:9, weekTopic:"Object-Oriented Programming", title:"Methods",
+   lesson:"Methods are functions defined inside a class that operate on an object's own data via self. They let objects carry behavior, not just data.",
+   challenge:"Add a method describe(self) to your ServerInstance class that returns a formatted summary string, and a method stop(self) that sets a status attribute to 'stopped'."},
+  {id:"w9d4", week:9, weekTopic:"Object-Oriented Programming", title:"Inheritance",
+   lesson:"A class can inherit from another with class Child(Parent):, gaining its attributes/methods and optionally overriding or extending them.",
+   challenge:"Write a class DatabaseInstance that inherits from ServerInstance and adds an extra attribute engine (e.g. 'postgres'). Create one instance and call the inherited describe() method plus a new engine-specific detail."},
+  {id:"w9d5", week:9, weekTopic:"Object-Oriented Programming", title:"Review — class hierarchy",
+   lesson:"Combine __init__, methods, and inheritance into a small but complete object model.",
+   challenge:"Build a small hierarchy: a base class Resource (name, region) with a describe() method, and two subclasses EC2Instance and S3Bucket that each add their own specific attribute and override describe() to include it."},
+
+  // WEEK 10 — APIs, boto3, final project
+  {id:"w10d1", week:10, weekTopic:"APIs, boto3 & Final Project", title:"requests & calling a REST API",
+   lesson:"The requests library (pip install requests) is the standard way to call HTTP APIs from Python: requests.get(url) returns a response object with .status_code and .json().",
+   challenge:"Write a script using requests.get() to call a public test API (e.g. https://api.github.com), check response.status_code == 200, and print one field from response.json()."},
+  {id:"w10d2", week:10, weekTopic:"APIs, boto3 & Final Project", title:"Parsing JSON API responses",
+   lesson:"API responses are usually nested dicts/lists — accessing the data you want means chaining keys and indexes, sometimes with a loop.",
+   challenge:"Write a script that takes a sample nested JSON response (paste in a Python dict resembling one, e.g. a list of repo objects with nested 'owner' dicts) and extracts just the names into a clean list."},
+  {id:"w10d3", week:10, weekTopic:"APIs, boto3 & Final Project", title:"Intro to boto3 — S3",
+   lesson:"boto3 is AWS's official Python SDK. boto3.client('s3') gives you a client object; list_buckets() returns your account's buckets as a dict.",
+   challenge:"Write a script using boto3 to create an S3 client and list all bucket names in your account (or, if you don't want to run it against real AWS, write the script correctly and add a comment noting it needs valid AWS credentials to execute)."},
+  {id:"w10d4", week:10, weekTopic:"APIs, boto3 & Final Project", title:"boto3 — EC2 instances",
+   lesson:"boto3.client('ec2').describe_instances() returns a heavily nested response (Reservations -> Instances) — good practice for the JSON-parsing skills from Day 2.",
+   challenge:"Write a script using boto3 to describe EC2 instances and print each instance's ID and current state (e.g. running/stopped), handling the nested Reservations/Instances structure."},
+  {id:"w10d5", week:10, weekTopic:"APIs, boto3 & Final Project", title:"Final project",
+   lesson:"Bring together variables, control flow, data structures, functions, file I/O, error handling, and classes into one cohesive script.",
+   challenge:"Write a script that: defines a Server class (name, cpu_percent), creates a list of 5 instances with varying cpu_percent values, writes a CSV report of servers over an 80% threshold, and wraps the whole thing in try/except so a bad value doesn't crash the report."},
+];
+
+const STORAGE_KEY = 'python-fundamentals-progress-v1';
+let progress = {}; // { id: { done: bool, note: string, date: 'YYYY-MM-DD' } }
+let loaded = false;
+
+function pad(n){ return n < 10 ? '0'+n : ''+n; }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+
+async function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      progress = JSON.parse(raw);
+    }
+  }catch(e){
+    progress = {};
+  }
+  loaded = true;
+  render();
+}
+
+let saveInFlight = false;
+let saveQueued = false;
+
+async function saveProgress(){
+  // localStorage is synchronous, but keep the same queue/status pattern
+  // in case this is later swapped back to an async backend.
+  setSaveStatus('saving');
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    setSaveStatus('saved');
+  }catch(e){
+    console.error('Storage error', e);
+    setSaveStatus('error');
+  }
+}
+
+function setSaveStatus(status){
+  const el = document.getElementById('pft-save-status');
+  if(!el) return;
+  if(status === 'saving'){ el.textContent = 'saving…'; el.style.color = 'var(--text-dim)'; }
+  else if(status === 'saved'){ el.textContent = 'saved ✓'; el.style.color = 'var(--green)'; setTimeout(()=>{ if(el.textContent==='saved ✓') el.textContent=''; }, 1500); }
+  else if(status === 'error'){ el.textContent = 'save failed — will retry on next change'; el.style.color = 'var(--red)'; }
+}
+
+function toggleDone(id){
+  const entry = progress[id] || {done:false, note:'', date:null};
+  entry.done = !entry.done;
+  entry.date = entry.done ? todayStr() : null;
+  progress[id] = entry;
+  saveProgress();
+  render();
+}
+
+let noteDebounceTimers = {};
+
+function updateNote(id, value){
+  const entry = progress[id] || {done:false, note:'', date:null};
+  entry.note = value;
+  progress[id] = entry;
+  // debounce: save ~600ms after typing pauses, instead of on every keystroke
+  if(noteDebounceTimers[id]) clearTimeout(noteDebounceTimers[id]);
+  noteDebounceTimers[id] = setTimeout(() => {
+    saveProgress();
+  }, 600);
+}
+
+let openWeek = 1;
+let openDay = null;
+
+function weekDayLabel(item){
+  const slug = item.title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+  return 'day'+pad(item.week*10+ (CURRICULUM.filter(c=>c.week===item.week).indexOf(item)+1) % 100).slice(-2) + '_' + slug + '.py';
+}
+
+function dayFilename(item, idxInWeek){
+  const slug = item.title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,24);
+  return 'day' + pad(idxInWeek+1) + '_' + slug + '.py';
+}
+
+function computeStats(){
+  const doneIds = Object.keys(progress).filter(id => progress[id].done);
+  const total = CURRICULUM.length;
+  const doneCount = doneIds.length;
+
+  // streak: count consecutive weekdays ending today/most-recent with completion
+  const doneDates = doneIds.map(id => progress[id].date).filter(Boolean).sort();
+  let streak = 0;
+  if(doneDates.length){
+    let cursor = new Date();
+    // walk backwards day by day; weekends don't break streak, just skipped
+    let dateSet = new Set(doneDates);
+    for(let i=0;i<400;i++){
+      const dow = cursor.getDay(); // 0 sun 6 sat
+      const ds = cursor.getFullYear()+'-'+pad(cursor.getMonth()+1)+'-'+pad(cursor.getDate());
+      if(dow === 0 || dow === 6){
+        cursor.setDate(cursor.getDate()-1);
+        continue;
+      }
+      if(dateSet.has(ds)){
+        streak++;
+        cursor.setDate(cursor.getDate()-1);
+      } else {
+        // if it's today and not done yet, don't break streak — just stop counting today, check yesterday
+        const todayS = todayStr();
+        if(ds === todayS){
+          cursor.setDate(cursor.getDate()-1);
+          continue;
+        }
+        break;
+      }
+    }
+  }
+
+  // this week = current calendar week's weekdays that are part of curriculum order (approx: next 5 undone or done in a row)
+  // Simplify: "this week" = how many of the *next chronological 5-day block* (based on completion order) are done this ISO week
+  const thisWeekDoneCount = doneDates.filter(ds => {
+    const d = new Date(ds+'T00:00:00');
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - now.getDay() + 1); // monday
+    start.setHours(0,0,0,0);
+    const end = new Date(start);
+    end.setDate(start.getDate()+5);
+    return d >= start && d < end;
+  }).length;
+
+  // estimated finish: remaining weekdays needed / pace
+  const remaining = total - doneCount;
+  let finishLabel = '—';
+  if(remaining <= 0){
+    finishLabel = 'Complete!';
+  } else {
+    let cursor = new Date();
+    let count = 0;
+    while(count < remaining){
+      cursor.setDate(cursor.getDate()+1);
+      const dow = cursor.getDay();
+      if(dow !== 0 && dow !== 6) count++;
+    }
+    finishLabel = cursor.toLocaleDateString('en-US',{month:'short', day:'numeric'});
+  }
+
+  return {total, doneCount, streak, thisWeekDoneCount, finishLabel};
+}
+
+function renderHabitGrid(){
+  const grid = document.getElementById('pft-habit-grid');
+  grid.innerHTML = '';
+  const doneDates = new Set(Object.values(progress).filter(e=>e.done && e.date).map(e=>e.date));
+  const today = new Date();
+  const numWeeks = 14;
+  // build columns Monday-start, oldest to newest
+  const start = new Date(today);
+  start.setDate(today.getDate() - (numWeeks*7) + 1);
+  // align to Monday
+  while(start.getDay() !== 1) start.setDate(start.getDate()-1);
+
+  for(let w=0; w<numWeeks; w++){
+    const col = document.createElement('div');
+    col.className = 'habit-week-col';
+    for(let d=0; d<5; d++){ // Mon-Fri only
+      const cellDate = new Date(start);
+      cellDate.setDate(start.getDate() + w*7 + d);
+      const ds = cellDate.getFullYear()+'-'+pad(cellDate.getMonth()+1)+'-'+pad(cellDate.getDate());
+      const cell = document.createElement('div');
+      const isFuture = cellDate > today;
+      cell.className = 'habit-cell' + (doneDates.has(ds) ? ' done' : '') + (ds === todayStr() ? ' today' : '');
+      cell.title = ds + (doneDates.has(ds) ? ' — completed' : '');
+      if(isFuture) cell.style.opacity = '0.35';
+      col.appendChild(cell);
+    }
+    grid.appendChild(col);
+  }
+}
+
+function render(){
+  if(!loaded) return;
+  const stats = computeStats();
+  document.getElementById('pft-stat-done').textContent = stats.doneCount + ' / ' + stats.total;
+  document.getElementById('pft-stat-streak').textContent = stats.streak + (stats.streak===1?' day':' days');
+  document.getElementById('pft-stat-finish').textContent = stats.finishLabel;
+  document.getElementById('pft-stat-week').textContent = stats.thisWeekDoneCount + ' / 5';
+  document.getElementById('pft-progress-bar').style.width = Math.round((stats.doneCount/stats.total)*100) + '%';
+
+  renderHabitGrid();
+  renderWeeks();
+}
+
+function renderWeeks(){
+  const container = document.getElementById('pft-weeks');
+  container.innerHTML = '';
+  const weeks = [...new Set(CURRICULUM.map(c=>c.week))];
+
+  weeks.forEach(weekNum => {
+    const items = CURRICULUM.filter(c=>c.week===weekNum);
+    const doneCount = items.filter(it => progress[it.id] && progress[it.id].done).length;
+    const isOpen = openWeek === weekNum;
+
+    const block = document.createElement('div');
+    block.className = 'week-block';
+
+    const header = document.createElement('div');
+    header.className = 'week-header';
+    header.innerHTML = `
+      <div class="week-header-left">
+        <span class="week-caret ${isOpen?'open':''}">▶</span>
+        <span class="week-name">week_${pad(weekNum)}/</span>
+        <span class="week-topic">${items[0].weekTopic}</span>
+      </div>
+      <span class="week-progress-mini">${doneCount}/${items.length}</span>
+    `;
+    header.onclick = () => { openWeek = isOpen ? null : weekNum; openDay = null; renderWeeks(); };
+    block.appendChild(header);
+
+    const daysWrap = document.createElement('div');
+    daysWrap.className = 'week-days' + (isOpen ? ' open' : '');
+
+    items.forEach((item, idx) => {
+      const entry = progress[item.id];
+      const isDone = entry && entry.done;
+      const filename = dayFilename(item, idx);
+
+      const row = document.createElement('div');
+      row.className = 'day-row';
+      row.innerHTML = `
+        <span class="day-check ${isDone?'done':''}">${isDone?'✓':''}</span>
+        <span class="day-filename ${isDone?'done':''}">${filename}</span>
+        <span class="day-topic">${item.title}</span>
+        <span class="day-status ${isDone?'pass':'pending'}">${isDone?'✓ passed':'pending'}</span>
+      `;
+      row.onclick = (e) => {
+        openDay = openDay === item.id ? null : item.id;
+        renderWeeks();
+      };
+      daysWrap.appendChild(row);
+
+      if(openDay === item.id){
+        const detail = document.createElement('div');
+        detail.className = 'detail-panel';
+        const note = (progress[item.id] && progress[item.id].note) || '';
+        detail.innerHTML = `
+          <div class="detail-block-label"># lesson</div>
+          <div class="detail-text">${item.lesson}</div>
+          <div class="detail-block-label"># challenge — write this as a script</div>
+          <div class="challenge-box">${item.challenge}</div>
+          <div class="detail-block-label"># notes — what tripped you up?</div>
+          <textarea class="notes-area" placeholder="optional notes...">${note}</textarea>
+          <div class="detail-actions">
+            <button class="btn primary ${isDone?'done-state':''}" data-action="toggle">${isDone ? '✓ Marked complete — click to undo' : 'Mark complete'}</button>
+            <span class="save-hint">${isDone && entry.date ? 'completed ' + entry.date : ''}</span>
+            <span class="save-hint mono" id="pft-save-status" style="margin-left:auto;"></span>
+          </div>
+        `;
+        const btn = detail.querySelector('[data-action="toggle"]');
+        btn.onclick = (e) => { e.stopPropagation(); toggleDone(item.id); };
+        const textarea = detail.querySelector('.notes-area');
+        textarea.onclick = (e) => e.stopPropagation();
+        textarea.oninput = (e) => updateNote(item.id, e.target.value);
+        daysWrap.appendChild(detail);
+      }
+    });
+
+    block.appendChild(daysWrap);
+    container.appendChild(block);
+  });
+}
+
+loadProgress();
+})();
+</script>
