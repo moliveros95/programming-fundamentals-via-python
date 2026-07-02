@@ -130,6 +130,7 @@ Note: progress is stored per-browser. Opening the file in a different browser or
 ## Reference
 
 - [W3Schools Programming](https://www.w3schools.com/programming/index.php) — general reference for looking up Python (and other language) syntax alongside the daily lessons
+- [W3Schools Python](https://www.w3schools.com/python/default.asp) — Python-specific reference and tutorial
 
 ## License
 
