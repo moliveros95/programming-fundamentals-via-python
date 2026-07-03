@@ -10,18 +10,6 @@ redirect_status = 300
 client_error    = 400
 server_error    = 500
 
-
-# if HTTP_code <= success_status:
-#     print("Success.")
-# elif HTTP_code <= redirect_status:
-#     print("Redirect.")
-# elif HTTP_code <= client_error:
-#     print("Client Error.")
-# elif HTTP_code <= server_error:
-#     print("Server Error.")
-# else:
-#     print("Invalid code")
-
 if HTTP_code >= 200 and HTTP_code < 300:
     print("Success.")
 elif HTTP_code >= 300 and HTTP_code < 400:
